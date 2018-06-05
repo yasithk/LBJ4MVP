@@ -96,6 +96,7 @@ df <-merge( Scorepercent,
 df %>%
   select("Round", "Player", "percentage", "percentage.x", "percentage.y")  %>% #x =assits, #y = rebounds
   mutate(average = mean(c(percentage, percentage.x, percentage.y))) %>%
+  rowwise() %>% 
   ungroup() %>%
   arrange((average))
 
