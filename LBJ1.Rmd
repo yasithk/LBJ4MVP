@@ -8,8 +8,27 @@ output: html_document
 ```{r setup, include=FALSE}
 library(dplyr)
 library(tidyverse)
-# setwd("C:/Users/yasit/Desktop/Blog")
-min <- read.csv(file ="usg.csv", sep = ',', header = T)
+library(ggplot2)
+library(scales)
+library("ggthemes")
+
+ setwd("C:/Users/yasit/Desktop/Blog")
+min <- read.csv(file ="usg2.csv", header = T)
+head(min)
+```
+
+
+```{r}
+min <- min %>% 
+        filter(min$MP.â.. > 300)
+
+ggplot(min, aes(x= MP.â.. , y= USG., colour="Tm", label=Player))+
+  geom_point() +
+geom_text(aes(label=ifelse(MP.â..> 700 ,as.character(Player),'')),hjust=0.9,vjust=-0.5) +
+  ggtitle("Is this guy human?", subtitle = "Usage Rate vs. Minutes per game, for players with at least 300 minutes in the 2018 playoffs") + scale_color_fivethirtyeight("cyl") +
+  theme_fivethirtyeight()
+
+
 ```
 
 
@@ -169,11 +188,10 @@ plot(x2$ALL, x2$diff, )
 ```
 
 ```{r}
-library(ggplot2)
-library(scales)
 ggplot(x2, aes(x= ALL, y= diff, colour="Player", label=Player))+
   geom_point() +
-geom_text(aes(label=ifelse(ALL>0.14 | diff > 0.04,as.character(Player),'')),hjust=0.9,vjust=-0.5)
+geom_text(aes(label=ifelse(ALL>0.14 | diff > 0.04,as.character(Player),'')),hjust=0.9,vjust=-0.5) +scale_color_fivethirtyeight("red") +
+  theme_fivethirtyeight()
 
 ```
 
