@@ -1,0 +1,217 @@
+---
+title: "Blog2"
+author: "Yasith"
+date: "3 June 2018"
+output:
+  pdf_document: default
+  html_document: default
+---
+###Plot 1
+```{r setup}
+library(dplyr)
+library(tidyverse)
+library(ggplot2)
+library(scales)
+library("ggthemes")
+
+ # setwd("C:/Users/yasit/Desktop/Blog")
+min <- read.csv(file ="usg2.csv", header = T)
+head(min)
+```
+
+
+```{r}
+min <- min %>% 
+        filter(min$MP.â.. > 300)
+
+ggplot(min, aes(x= MP.â.. , y= USG., colour="Tm", label=Player))+
+  geom_point() +
+geom_text(aes(label=ifelse(MP.â..> 700 ,as.character(Player),'')),hjust=0.9,vjust=-0.5) +
+  ggtitle("Is this guy human?", subtitle = "Usage Rate vs. Minutes per game, for players with at least 300 minutes in the 2018 playoffs") + scale_color_fivethirtyeight("cyl") +
+  theme_fivethirtyeight()
+
+
+```
+
+
+###Table of Percent per rd by player
+
+#####percent points = points scored by player/ totoal points by both teams per round
+
+#####sum(points by player) group by round
+#####sum(points by rd)
+
+```{r cars}
+percent <- read.csv('PLAYOFFSDB.csv', header = TRUE )
+ head(percent)
+```
+
+#player_scorepercent(x,r) = player_score(x,r)/ sum(team_score(r))
+
+#Points
+```{r pressure, echo=FALSE}
+sumscore <- percent%>% 
+  group_by(RD) %>% 
+  summarise(sum(PTS))
+
+playerscore <- percent %>% 
+  group_by(Player, RD)%>% 
+  summarise(sum(PTS))
+
+Scorepercent <-full_join(sumscore, playerscore, by= "RD")
+colnames(Scorepercent) <- c("Round", "TotalPoints", "Player", "PlayerPoints")
+
+for(i in 1:nrow(Scorepercent)){
+  Scorepercent$percentage[i] <- Scorepercent$PlayerPoints[i] / Scorepercent$TotalPoints[i]
+}
+
+Scorepercent %>%
+  arrange(desc(percentage))
+
+
+#Github improvement is to use map()
+# percent <- function(percentof){
+# Scorepercent$PlayerPoints(percentof) / Scorepercent$TotalPoints(percentof)
+# }
+# result <- mutate(as.character(Scorepercent$Player), result = map(Scorepercent$Player, percent))
+``` 
+
+#Assists 
+```{r}
+sumassits <- percent%>% 
+  group_by(RD) %>% 
+  summarise(sum(AST))
+
+playerassits <- percent %>% 
+  group_by(Player, RD)%>% 
+  summarise(sum(AST))
+
+assistspercent <-full_join(sumassits, playerassits, by= "RD")
+colnames(assistspercent) <- c("Round", "Totalassits", "Player", "Playerassits")
+
+for(i in 1:nrow(assistspercent)){
+  assistspercent$percentage[i] <- assistspercent$Playerassits[i] / assistspercent$Totalassits[i]
+}
+
+assistspercent %>%
+  arrange(desc(percentage))
+```
+
+#Rebounds
+```{r, =FALSE}
+sumrebs <- percent%>% 
+  group_by(RD) %>% 
+  summarise(sum(TRB))
+
+playerreb <- percent %>% 
+  group_by(Player, RD)%>% 
+  summarise(sum(TRB))
+
+rebpercent <-full_join(sumrebs, playerreb, by= "RD")
+colnames(rebpercent) <- c("Round", "Totalreb", "Player", "Playerreb")
+
+for(i in 1:nrow(rebpercent)){
+  rebpercent$percentage[i] <- rebpercent$Playerreb[i] / rebpercent$Totalreb[i]
+}
+
+rebpercent %>%
+  arrange(desc(percentage))
+```
+
+
+```{r}
+df <-merge( Scorepercent,
+  merge(assistspercent, rebpercent, by.x = (c("Round", "Player")), by.y = c("Round", "Player")),
+  by.x = c("Round", "Player"), by.y = c("Round", "Player")
+)
+
+# df1 <-
+  df1 <- data.frame(df %>%
+        select("Round", "Player", "percentage", "percentage.x", "percentage.y")  %>% #x =assits, #y = rebounds
+          rowwise() %>% 
+          mutate(average = mean(c(percentage, percentage.x, percentage.y))) %>%
+          ungroup() %>%
+          arrange(desc(average)))
+
+  # x <- function(div){
+    
+  # }  
+  colnames(df1) <- c("Round", "Player", "PPTS", "PASST", "PREBS", "ALL")
+   
+head(df1)
+
+df1[1:25,]
+```
+
+
+#Graphic 3
+```{r}
+jointab <- left_join(df1, percent, by = c("Round"="RD", "Player"="Player")) %>% 
+  select(Round, TEAM, Player, PPTS, PASST, PREBS, ALL)
+# jointab %>% group_by(Round) %>% arrange(Round, desc(ALL) ) %>% filter(Round == "CB")
+```
+
+```{r}
+x <- jointab %>%
+  group_by( Round) %>%
+  top_n(n = 4, wt = ALL) %>%
+  arrange(Round, desc(ALL))
+
+listx <- select(jointab, c("Round", "TEAM", "Player"))
+
+head(x)
+
+```
+
+```{r}
+library(data.table)
+x <- data.table(x)
+setkey(x, "TEAM")
+
+
+# x %>% group_by(Round) %>% 
+  x[!duplicated(x)]
+  
+  
+x1 <-x %>% distinct( Round, TEAM, .keep_all = TRUE) %>% arrange(Round, desc(ALL))
+```
+```{r}
+for ( i in 1:nrow(x1)){
+  x1$diff[i] <- x1$ALL[i] - x1$ALL[i+1]
+}
+
+x1 <- x1 %>% arrange(Round, desc(ALL))
+```
+
+```{r}
+toDelete <- seq(1, nrow(x1), 2)
+x2 <- x1[ toDelete ,]
+
+x2 <- x2 %>% arrange(Round, desc(ALL))
+head(x2)
+```
+```{r}
+plot(x2$ALL, x2$diff )
+```
+
+```{r}
+ggplot(x2, aes(x= ALL, y= diff, colour="Player", label=Player))+
+  geom_point() +
+geom_text(aes(label=ifelse(ALL>0.14 | diff > 0.04,as.character(Player),'')),hjust=0.9,vjust=-0.5) +scale_color_fivethirtyeight("red") +
+  theme_fivethirtyeight()
+
+```
+
+```{r}
+ggplot(x2, aes(x= ALL, y= diff, colour="Player", label=Player))+
+  geom_point() +
+geom_text(aes(label=Player,hjust=0.9,vjust=-0.5))
+
+```
+
+
+Basic or advanced stats point to LeBron playing at a level we have never seen before - strengthing his case as THE greatest of all time. To avoid robbing Harden of the regular season MVP twice let's give that to him. But win or lose LeBron James deserves to at least win the Finals MVP. 
+  
+  If you have payed the slightest of attention to this year's playoffs, you know his numbers have been incredible - he leads the league in points, assits, minutes played and add to that he already has seven 40 point games (couple while facing elimination). But I want to compare his production from a slightly different angle - how much impact James has had on the series relative to everyone else - combined.
+
+Through the first five games, James has gathered an incredible 18 percent of all the points scored, assists dished and rebounds collected by anyone in this series. If that stands, it will be 1.1 percentage points higher than the next highest over the past 46 years (since they started having a finals MVP in 1969). Here are the top 20, plus James:
