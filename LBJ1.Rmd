@@ -32,12 +32,12 @@ geom_text(aes(label=ifelse(MP.â..> 700 ,as.character(Player),'')),hjust=0.9,vjus
 ```
 
 
-#Table of Percent per rd by player
+###Table of Percent per rd by player
 
-#%percent points = points scored by player/ totoal points by both teams per round
+#####percent points = points scored by player/ totoal points by both teams per round
 
-#sum(points by player) group by round
-#sum(points by rd)
+#####sum(points by player) group by round
+#####sum(points by rd)
 
 ```{r cars}
 percent <- read.csv('PLAYOFFSDB.csv', header = TRUE )
@@ -74,7 +74,7 @@ Scorepercent %>%
 # result <- mutate(as.character(Scorepercent$Player), result = map(Scorepercent$Player, percent))
 ``` 
 
-#Assits 
+#Assists 
 ```{r}
 sumassits <- percent%>% 
   group_by(RD) %>% 
@@ -134,7 +134,7 @@ df <-merge( Scorepercent,
   # }  
   colnames(df1) <- c("Round", "Player", "PPTS", "PASST", "PREBS", "ALL")
    
-(df1)
+head(df1)
 ```
 
 
@@ -153,11 +153,12 @@ x <- jointab %>%
 
 listx <- select(jointab, c("Round", "TEAM", "Player"))
 
-x
+head(x)
 
 ```
 
 ```{r}
+library(data.table)
 x <- data.table(x)
 setkey(x, "TEAM")
 
@@ -181,10 +182,10 @@ toDelete <- seq(1, nrow(x1), 2)
 x2 <- x1[ toDelete ,]
 
 x2 <- x2 %>% arrange(Round, desc(ALL))
-x2
+head(x2)
 ```
 ```{r}
-plot(x2$ALL, x2$diff, )
+plot(x2$ALL, x2$diff )
 ```
 
 ```{r}
