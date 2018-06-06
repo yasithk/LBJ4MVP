@@ -96,7 +96,7 @@ assistspercent %>%
 ```
 
 #Rebounds
-```{r}
+```{r, =FALSE}
 sumrebs <- percent%>% 
   group_by(RD) %>% 
   summarise(sum(TRB))
@@ -115,6 +115,8 @@ for(i in 1:nrow(rebpercent)){
 rebpercent %>%
   arrange(desc(percentage))
 ```
+
+
 ```{r}
 df <-merge( Scorepercent,
   merge(assistspercent, rebpercent, by.x = (c("Round", "Player")), by.y = c("Round", "Player")),
@@ -135,6 +137,8 @@ df <-merge( Scorepercent,
   colnames(df1) <- c("Round", "Player", "PPTS", "PASST", "PREBS", "ALL")
    
 head(df1)
+
+df1[1:25,]
 ```
 
 
@@ -204,8 +208,8 @@ geom_text(aes(label=Player,hjust=0.9,vjust=-0.5))
 ```
 
 
-Monday on FiveThirtyEight, my colleague Neil Paine discussed how both James's basic and advanced stats point to his being one of the all-time great finals series. On the mothersite, Kevin Pelton argues that James should win the MVP based on WARP (wins above replacement player), and it seems that the idea that James should win the MVP even if the Cavs lose is getting popular.
-
-So I'd like to look at James's production from a slightly different angle. Rather than just look at how James's production stands on its own right, let's see how much impact James has had on the series relative to everyone else - combined.
+  Basic or advanced stats point to LeBron playing at a level we have never seen before - strengthing his case as THE greatest of all time. To avoid robbing Harden of the regular season MVP twice let's give that to him. But win or lose LeBron James deserves to at least win the Finals MVP. 
+  
+  If you have payed the slightest of attention to this year's playoffs, you know his numbers have been incredible - he leads the league in points, assits, minutes played and add to that he already has seven 40 point games (couple while facing elimination). But I want to compare his production from a slightly different angle. Let's see how much impact James has had on the series relative to everyone else - combined.
 
 Through the first five games, James has gathered an incredible 18 percent of all the points scored, assists dished and rebounds collected by anyone in this series. If that stands, it will be 1.1 percentage points higher than the next highest over the past 46 years (since they started having a finals MVP in 1969). Here are the top 20, plus James:
