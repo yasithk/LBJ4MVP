@@ -1,4 +1,3 @@
-
 library(dplyr)
 library(tidyverse)
 # setwd("C:/Users/yasit/Desktop/Blog")
@@ -92,13 +91,28 @@ df <-merge( Scorepercent,
             by.x = c("Round", "Player"), by.y = c("Round", "Player")
 )
 
-# df1 <-
-df %>%
+ df1 <- df %>%
   select("Round", "Player", "percentage", "percentage.x", "percentage.y")  %>% #x =assits, #y = rebounds
+  rowwise() %>%
   mutate(average = mean(c(percentage, percentage.x, percentage.y))) %>%
-  rowwise() %>% 
   ungroup() %>%
-  arrange((average))
+  arrange((desc(average)))
 
+colnames(df1) <- c("Round","Player", "PTS", "ASST","REBS", "ALL")
+#x =assits, #y = rebounds
 
+############ Graphic 3 - %share ahead of 2nd star vs % %share
+######## 
+contable <-   left_join(df1, percent, by = c("Round"="RD", "Player"="Player")) %>%
+       select(Round, TEAM, Player, PTS.x, ASST, REBS, ALL)  
 
+contable <- data.frame(contable)           
+contable %>% group_by(.dots=c( "TEAM"))
+
+contable <- ungroup(contable)
+
+contable %>% group_by(Round)
+
+XXX <- xx %>%
+  +     group_by(Round,TEAM) %>%
+  +     top_n(n = 2, wt = ALL)
