@@ -1,0 +1,192 @@
+---
+title: "Blog2"
+author: "Yasith"
+date: "3 June 2018"
+output: html_document
+---
+###Plot 1
+```{r setup, include=FALSE}
+library(dplyr)
+library(tidyverse)
+# setwd("C:/Users/yasit/Desktop/Blog")
+min <- read.csv(file ="usg.csv", sep = ',', header = T)
+```
+
+
+#Table of Percent per rd by player
+
+#%percent points = points scored by player/ totoal points by both teams per round
+
+#sum(points by player) group by round
+#sum(points by rd)
+
+```{r cars}
+percent <- read.csv('PLAYOFFSDB.csv', header = TRUE )
+ head(percent)
+```
+
+#player_scorepercent(x,r) = player_score(x,r)/ sum(team_score(r))
+
+#Points
+```{r pressure, echo=FALSE}
+sumscore <- percent%>% 
+  group_by(RD) %>% 
+  summarise(sum(PTS))
+
+playerscore <- percent %>% 
+  group_by(Player, RD)%>% 
+  summarise(sum(PTS))
+
+Scorepercent <-full_join(sumscore, playerscore, by= "RD")
+colnames(Scorepercent) <- c("Round", "TotalPoints", "Player", "PlayerPoints")
+
+for(i in 1:nrow(Scorepercent)){
+  Scorepercent$percentage[i] <- Scorepercent$PlayerPoints[i] / Scorepercent$TotalPoints[i]
+}
+
+Scorepercent %>%
+  arrange(desc(percentage))
+
+
+#Github improvement is to use map()
+# percent <- function(percentof){
+# Scorepercent$PlayerPoints(percentof) / Scorepercent$TotalPoints(percentof)
+# }
+# result <- mutate(as.character(Scorepercent$Player), result = map(Scorepercent$Player, percent))
+``` 
+
+#Assits 
+```{r}
+sumassits <- percent%>% 
+  group_by(RD) %>% 
+  summarise(sum(AST))
+
+playerassits <- percent %>% 
+  group_by(Player, RD)%>% 
+  summarise(sum(AST))
+
+assistspercent <-full_join(sumassits, playerassits, by= "RD")
+colnames(assistspercent) <- c("Round", "Totalassits", "Player", "Playerassits")
+
+for(i in 1:nrow(assistspercent)){
+  assistspercent$percentage[i] <- assistspercent$Playerassits[i] / assistspercent$Totalassits[i]
+}
+
+assistspercent %>%
+  arrange(desc(percentage))
+```
+
+#Rebounds
+```{r}
+sumrebs <- percent%>% 
+  group_by(RD) %>% 
+  summarise(sum(TRB))
+
+playerreb <- percent %>% 
+  group_by(Player, RD)%>% 
+  summarise(sum(TRB))
+
+rebpercent <-full_join(sumrebs, playerreb, by= "RD")
+colnames(rebpercent) <- c("Round", "Totalreb", "Player", "Playerreb")
+
+for(i in 1:nrow(rebpercent)){
+  rebpercent$percentage[i] <- rebpercent$Playerreb[i] / rebpercent$Totalreb[i]
+}
+
+rebpercent %>%
+  arrange(desc(percentage))
+```
+```{r}
+df <-merge( Scorepercent,
+  merge(assistspercent, rebpercent, by.x = (c("Round", "Player")), by.y = c("Round", "Player")),
+  by.x = c("Round", "Player"), by.y = c("Round", "Player")
+)
+
+# df1 <-
+  df1 <- data.frame(df %>%
+        select("Round", "Player", "percentage", "percentage.x", "percentage.y")  %>% #x =assits, #y = rebounds
+          rowwise() %>% 
+          mutate(average = mean(c(percentage, percentage.x, percentage.y))) %>%
+          ungroup() %>%
+          arrange(desc(average)))
+
+  # x <- function(div){
+    
+  # }  
+  colnames(df1) <- c("Round", "Player", "PPTS", "PASST", "PREBS", "ALL")
+   
+(df1)
+```
+
+
+#Graphic 3
+```{r}
+jointab <- left_join(df1, percent, by = c("Round"="RD", "Player"="Player")) %>% 
+  select(Round, TEAM, Player, PPTS, PASST, PREBS, ALL)
+# jointab %>% group_by(Round) %>% arrange(Round, desc(ALL) ) %>% filter(Round == "CB")
+```
+
+```{r}
+x <- jointab %>%
+  group_by( Round) %>%
+  top_n(n = 4, wt = ALL) %>%
+  arrange(Round, desc(ALL))
+
+listx <- select(jointab, c("Round", "TEAM", "Player"))
+
+x
+
+```
+
+```{r}
+x <- data.table(x)
+setkey(x, "TEAM")
+
+
+# x %>% group_by(Round) %>% 
+  x[!duplicated(x)]
+  
+  
+x1 <-x %>% distinct( Round, TEAM, .keep_all = TRUE) %>% arrange(Round, desc(ALL))
+```
+```{r}
+for ( i in 1:nrow(x1)){
+  x1$diff[i] <- x1$ALL[i] - x1$ALL[i+1]
+}
+
+x1 <- x1 %>% arrange(Round, desc(ALL))
+```
+
+```{r}
+toDelete <- seq(1, nrow(x1), 2)
+x2 <- x1[ toDelete ,]
+
+x2 <- x2 %>% arrange(Round, desc(ALL))
+x2
+```
+```{r}
+plot(x2$ALL, x2$diff, )
+```
+
+```{r}
+library(ggplot2)
+library(scales)
+ggplot(x2, aes(x= ALL, y= diff, colour="Player", label=Player))+
+  geom_point() +
+geom_text(aes(label=ifelse(ALL>0.14 | diff > 0.04,as.character(Player),'')),hjust=0.9,vjust=-0.5)
+
+```
+
+```{r}
+ggplot(x2, aes(x= ALL, y= diff, colour="Player", label=Player))+
+  geom_point() +
+geom_text(aes(label=Player,hjust=0.9,vjust=-0.5))
+
+```
+
+
+Monday on FiveThirtyEight, my colleague Neil Paine discussed how both James's basic and advanced stats point to his being one of the all-time great finals series. On the mothersite, Kevin Pelton argues that James should win the MVP based on WARP (wins above replacement player), and it seems that the idea that James should win the MVP even if the Cavs lose is getting popular.
+
+So I'd like to look at James's production from a slightly different angle. Rather than just look at how James's production stands on its own right, let's see how much impact James has had on the series relative to everyone else - combined.
+
+Through the first five games, James has gathered an incredible 18 percent of all the points scored, assists dished and rebounds collected by anyone in this series. If that stands, it will be 1.1 percentage points higher than the next highest over the past 46 years (since they started having a finals MVP in 1969). Here are the top 20, plus James:
