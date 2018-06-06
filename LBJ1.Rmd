@@ -5,14 +5,14 @@ date: "3 June 2018"
 output: html_document
 ---
 ###Plot 1
-```{r setup, include=FALSE}
+```{r setup}
 library(dplyr)
 library(tidyverse)
 library(ggplot2)
 library(scales)
 library("ggthemes")
 
- setwd("C:/Users/yasit/Desktop/Blog")
+ # setwd("C:/Users/yasit/Desktop/Blog")
 min <- read.csv(file ="usg2.csv", header = T)
 head(min)
 ```
@@ -208,8 +208,8 @@ geom_text(aes(label=Player,hjust=0.9,vjust=-0.5))
 ```
 
 
-  Basic or advanced stats point to LeBron playing at a level we have never seen before - strengthing his case as THE greatest of all time. To avoid robbing Harden of the regular season MVP twice let's give that to him. But win or lose LeBron James deserves to at least win the Finals MVP. 
+Basic or advanced stats point to LeBron playing at a level we have never seen before - strengthing his case as THE greatest of all time. To avoid robbing Harden of the regular season MVP twice let's give that to him. But win or lose LeBron James deserves to at least win the Finals MVP. 
   
-  If you have payed the slightest of attention to this year's playoffs, you know his numbers have been incredible - he leads the league in points, assits, minutes played and add to that he already has seven 40 point games (couple while facing elimination). But I want to compare his production from a slightly different angle. Let's see how much impact James has had on the series relative to everyone else - combined.
+  If you have payed the slightest of attention to this year's playoffs, you know his numbers have been incredible - he leads the league in points, assits, minutes played and add to that he already has seven 40 point games (couple while facing elimination). But I want to compare his production from a slightly different angle - how much impact James has had on the series relative to everyone else - combined.
 
 Through the first five games, James has gathered an incredible 18 percent of all the points scored, assists dished and rebounds collected by anyone in this series. If that stands, it will be 1.1 percentage points higher than the next highest over the past 46 years (since they started having a finals MVP in 1969). Here are the top 20, plus James:
