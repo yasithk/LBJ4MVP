@@ -2,7 +2,9 @@
 title: "Blog2"
 author: "Yasith"
 date: "3 June 2018"
-output: html_document
+output:
+  pdf_document: default
+  html_document: default
 ---
 ###Plot 1
 ```{r setup}
