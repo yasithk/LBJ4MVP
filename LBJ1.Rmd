@@ -21,15 +21,31 @@ head(min)
 
 
 ```{r}
-min <- min %>% 
-        filter(min$MP.â.. > 300)
+min
 
-ggplot(min, aes(x= MP.â.. , y= USG., colour="Tm", label=Player))+
-  geom_point() +
-geom_text(aes(label=ifelse(MP.â..> 700 ,as.character(Player),'')),hjust=0.9,vjust=-0.5) +
-  ggtitle("Is this guy human?", subtitle = "Usage Rate vs. Minutes per game, for players with at least 300 minutes in the 2018 playoffs") + scale_color_fivethirtyeight("cyl") +
-  theme_fivethirtyeight()
+for (i in 1:nrow(min)) {
+min$minshare[i] <- min$MP.â..[i]/ (min$G[i]*48 )
+}
+min
+```
 
+
+```{r}
+ min1 <- min %>% 
+        filter(min$G > 10 & Player != c("LeBron James", "James Harden") )
+hightlight <- filter(min, Player == c("LeBron James", "James Harden") )
+
+ggplot(min1, aes(x= minshare , y= USG./100, colour="Tm", label=Player)) +
+
+  geom_point(show.legend=F, color= 'black', size=1.3) +
+ geom_point(data=hightlight , color= 'red', size=3) +
+   labs(x = "Proportion of Total Game Time per Game", y = "Usage Rate")+
+  geom_text_repel(data = hightlight, aes(label=ifelse(minshare> 0.85 | USG. >32,as.character(Player),'')), color ="black") +
+  ggtitle("Lebron's Historic Workload", subtitle = "Usage Rate vs. Proportion Mins per game, for players with at least 300 minutes")+  theme(plot.title = element_text(size = 25, face = "bold"), legend.position="none")+
+
+#+ #scale_color_fivethirtyeight("cyl") 
+       scale_color_fivethirtyeight() +
+    theme_fivethirtyeight(base_size = 13)
 
 ```
 
@@ -44,6 +60,10 @@ geom_text(aes(label=ifelse(MP.â..> 700 ,as.character(Player),'')),hjust=0.9,vjus
 ```{r cars}
 percent <- read.csv('PLAYOFFSDB.csv', header = TRUE )
  head(percent)
+```
+```{r}
+library(knitr)
+library(kableExtra)
 ```
 
 #player_scorepercent(x,r) = player_score(x,r)/ sum(team_score(r))
@@ -140,7 +160,10 @@ df <-merge( Scorepercent,
    
 head(df1)
 
-df1[1:25,]
+write.csv(df1[1:25,], "top25.csv")
+```
+```{r}
+filter(df1, Round == "GC")
 ```
 
 
@@ -189,16 +212,28 @@ x2 <- x1[ toDelete ,]
 
 x2 <- x2 %>% arrange(Round, desc(ALL))
 head(x2)
-```
-```{r}
+
+
+``````{r}
 plot(x2$ALL, x2$diff )
 ```
 
 ```{r}
-ggplot(x2, aes(x= ALL, y= diff, colour="Player", label=Player))+
-  geom_point() +
-geom_text(aes(label=ifelse(ALL>0.14 | diff > 0.04,as.character(Player),'')),hjust=0.9,vjust=-0.5) +scale_color_fivethirtyeight("red") +
-  theme_fivethirtyeight()
+x21 <- x2 %>% 
+        filter( Player != "LeBron James" )
+hightlight1 <- filter(x2, Player== "LeBron James")
+
+ggplot(x21, aes(x= ALL, y= diff, colour="Player", label=Player))+
+  geom_point(show.legend=F, color= 'black', size=1.3) +
+  geom_point(data=hightlight1 , color= 'red', size=3)+
+  labs(x = "Player's share", y = "Percentage of Points ahead of second place")+
+  geom_text_repel(data = x2,  color ="black")+
+# geom_text(aes(label=ifelse(ALL>0.14 | diff > 0.04,as.character(Player),'')),hjust=0.9,vjust=-0.5)+
+ ggtitle("Most Dominating NBA Playoff Performances", subtitle = "difference of percent share between the top two players of each series against percent/portion of minutes player per game  ")+  
+  theme(plot.title = element_text(size = 25, face = "bold"), legend.position="none") 
+#+ #scale_color_fivethirtyeight("cyl") 
+    #    scale_color_fivethirtyeight() +
+    # theme_fivethirtyeight(base_size = 13)
 
 ```
 
